@@ -21,7 +21,7 @@ export function AdminHeader({ onLogout }: Props) {
         <div className="hidden sm:flex items-center gap-4">
           <a href="#pregled" className="text-sage-300 hover:text-white text-sm transition-colors">Termini</a>
           <a href="#dostupnost" className="text-sage-300 hover:text-white text-sm transition-colors">Dostupnost</a>
-          <a href="#lista" className="text-sage-300 hover:text-white text-sm transition-colors">Svi termini</a>
+          <a href="#lista" className="text-sage-300 hover:text-white text-sm transition-colors">Termini</a>
           <Link to="/" className="flex items-center gap-1.5 text-sage-300 hover:text-white text-sm transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Nazad na sajt
@@ -50,7 +50,7 @@ export function AdminHeader({ onLogout }: Props) {
         <div className="sm:hidden border-t border-sage-700 px-4 pb-3 space-y-2">
           <a href="#pregled" onClick={() => setMenuOpen(false)} className="block py-2 text-sage-300 text-sm">Termini</a>
           <a href="#dostupnost" onClick={() => setMenuOpen(false)} className="block py-2 text-sage-300 text-sm">Dostupnost</a>
-          <a href="#lista" onClick={() => setMenuOpen(false)} className="block py-2 text-sage-300 text-sm">Svi termini</a>
+          <a href="#lista" onClick={() => setMenuOpen(false)} className="block py-2 text-sage-300 text-sm">Termini</a>
           <Link to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-1.5 py-2 text-sage-300 text-sm">
             <ArrowLeft className="w-4 h-4" />
             Nazad na sajt

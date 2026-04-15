@@ -123,6 +123,64 @@ export const updateBookingStatus = mutation({
   },
 });
 
+export const createAdminBooking = mutation({
+  args: {
+    clientName: v.string(),
+    date: v.string(),
+    time: v.string(),
+    serviceId: v.id("services"),
+    sessionToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.sessionToken);
+
+    const clientName = args.clientName.trim();
+    if (!clientName) {
+      throw new Error("Ime je obavezno.");
+    }
+
+    const service = await ctx.db.get(args.serviceId);
+    if (!service || !service.active) {
+      throw new Error("Odabrana usluga više nije dostupna.");
+    }
+
+    const availability = await ctx.db
+      .query("availability")
+      .withIndex("by_date", (q) => q.eq("date", args.date))
+      .first();
+
+    const bookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_date_time", (q) => q.eq("date", args.date))
+      .collect();
+
+    const shift = availability?.shift ?? "";
+    if (!isSlotAvailable(shift, bookings, args.time)) {
+      throw new Error("Odabrani termin više nije dostupan.");
+    }
+
+    const bookingId = await ctx.db.insert("bookings", {
+      serviceId: args.serviceId,
+      date: args.date,
+      time: args.time,
+      mood: "razgovor",
+      clientName,
+      clientEmail: "",
+      clientPhone: "",
+      status: "potvrđen",
+      medicalChecks: {
+        noBloodThinners: false,
+        noAnemia: false,
+        notPregnant: false,
+        noRecentFood: false,
+      },
+      referralSource: "telefon",
+    });
+
+    return bookingId;
+  },
+});
+
 export const cancelBooking = mutation({
   args: {
     id: v.id("bookings"),
