@@ -5,3 +5,6 @@ When working on Convex code, **always read `convex/_generated/ai/guidelines.md` 
 
 Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
 <!-- convex-ai-end -->
+
+use to deploy convex in production
+cd /Users/ahmedb/Documents/Fax/ZenZone/zenzone && npx convex deploy --yes 2>&1 | tail -10

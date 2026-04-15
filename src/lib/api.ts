@@ -42,6 +42,7 @@ export const api = {
     },
     bookings: {
       createBooking: m("mutations/bookings:createBooking"),
+      createAdminBooking: m<{ clientName: string; date: string; time: string; serviceId: string; sessionToken: string }>("mutations/bookings:createAdminBooking"),
       updateBookingStatus: m<{ id: string; status: string; sessionToken: string }>("mutations/bookings:updateBookingStatus"),
       cancelBooking: m<{ id: string; sessionToken: string }>("mutations/bookings:cancelBooking"),
     },
