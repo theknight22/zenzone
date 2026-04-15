@@ -48,6 +48,7 @@ export const api = {
     availability: {
       setShift: m<{ date: string; shift: string; sessionToken: string }>("mutations/availability:setShift"),
       setWeekShifts: m<{ offset: number; shifts: string[]; sessionToken: string }>("mutations/availability:setWeekShifts"),
+      toggleBlockedSlot: m<{ date: string; time: string; sessionToken: string }>("mutations/availability:toggleBlockedSlot"),
     },
     loyalty: {
       incrementVisit: m("mutations/loyalty:incrementVisit"),
