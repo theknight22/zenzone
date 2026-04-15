@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { Hero } from '@/components/Hero';
 import { Services } from '@/components/Services';
 import { Packages } from '@/components/Packages';
