@@ -44,7 +44,7 @@ export function Footer() {
               <a href="#paketi" className="block hover:text-white transition-colors">Paketi</a>
               <a href="#o-menii" className="block hover:text-white transition-colors">O meni</a>
               <a href="#zakazi" className="block hover:text-white transition-colors">Zakaži termin</a>
-              <Link to="/admin" className="block hover:text-white transition-colors">Menadžment</Link>
+              <Link to="/admin" className="block hover:text-white transition-colors">Admin</Link>
             </div>
           </div>
         </div>
