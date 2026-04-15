@@ -58,7 +58,7 @@ export const setWeekShifts = mutation({
         .first();
 
       if (existing) {
-        await ctx.db.patch(existing._id, { shift: args.shifts[i] });
+        await ctx.db.patch(existing._id, { shift: args.shifts[i], blockedSlots: existing.blockedSlots ?? [] });
       } else {
         await ctx.db.insert("availability", {
           date: dateStr,
