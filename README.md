@@ -2,168 +2,209 @@
 
 Web platforma za fizioterapeutkinju — klijentski sajt za zakazivanje termina + admin panel za upravljanje.
 
-## Tehnologije
+## Tech Stack
 
 | Layer | Tehnologija |
 |-------|-------------|
 | Frontend | React 19, TypeScript |
 | Routing | TanStack Router (file-based) |
-| Data fetching | TanStack Query (pripremljen za Convex) |
+| State | React useReducer (booking flow) |
+| Backend | Convex (production deployment) |
 | Styling | Tailwind CSS v4 |
 | Icons | Lucide React |
 | Build | Vite 8 |
 | PWA | Service Worker, manifest.json |
-| Backend (planirano) | Convex, Resend.com — vidi [backend_plan.md](./backend_plan.md) |
+| Email | Resend.com (via Convex actions) |
+| Hosting | Vercel (frontend), Convex Cloud (backend) |
 
-## Pokretanje
+## Live URLs
+
+- **Frontend:** https://zen-zone-besic.vercel.app
+- **Admin:** https://zen-zone-besic.vercel.app/admin
+- **Backend API:** https://clean-seahorse-627.eu-west-1.convex.cloud
+
+## Pokretanje (razvoj)
 
 ```bash
 npm install
-npm run dev        # development server
-npm run build      # production build
-npm run lint       # eslint provjera
+npm run dev        # frontend + Convex dev server
+npx convex dev     # start Convex backend (ako nije pokrenut)
 ```
+
+## Production deploy
+
+```bash
+git push                    # Vercel auto-deploy
+npx convex deploy --prod    # Convex backend
+```
+
+---
+
+## Arhitektura
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   Frontend      │────▶│   Convex Backend │────▶│   Resend Email  │
+│   (Vercel)      │◀────│   (Cloud)        │     │   (API)         │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+        │                       │
+        │              ┌─────────┴─────────┐
+        │              │                  │
+        ▼              ▼                  ▼
+   PWA App       Queries             Mutations
+   - booking     - getServices       - createBooking
+   - admin       - getBookings       - updateBookingStatus
+                  - getAvailableSlots - setShift
+                  - getWeekAvail     - toggleBlockedSlot
+                  - getLoyalty
+```
+
+---
 
 ## Struktura projekta
 
 ```
 zenzone/
+├── convex/                  # Convex backend
+│   ├── schema.ts            # Tabele: services, packages, bookings, availability, loyalty, adminSessions
+│   ├── queries/             # getServices, getBookings, getAvailableSlots, getWeekAvailability
+│   ├── mutations/           # createBooking, updateBookingStatus, setShift, toggleBlockedSlot
+│   ├── actions/             # Resend email slanje, auth verifikacija
+│   ├── lib/                 # adminAuth, slots helper, constants
+│   ├── seed.ts              # seedServicesAndPackages funkcija
+│   └── _generated/          # Auto-generated Convex types
 ├── public/
-│   ├── masaza.jpg           # Hero slika
-│   ├── hidzama1.jpg         # Hidžama kategorija slika
-│   ├── o meni.jpg           # Fotografija za O meni sekciju
+│   ├── masaza.jpg
+│   ├── hidzama1.jpg, hidzama2.jpg
+│   ├── o meni.jpg
+│   ├── icon.svg             # PWA ikona
 │   ├── manifest.json        # PWA manifest
-│   └── sw.js                # Service Worker
+│   └── sw.js                # Service Worker (stale-while-revalidate)
 ├── src/
-│   ├── main.tsx             # App entry — Convex + Router + Query provider
-│   ├── router.ts            # TanStack Router instanca
-│   ├── index.css            # Tailwind v4 + custom theme (sage/cream/terra)
-│   ├── routeTree.gen.ts     # Auto-generisani route tree
+│   ├── main.tsx
+│   ├── router.ts
+│   ├── index.css            # Tailwind v4 + sage/cream/terra/warm theme
+│   ├── routeTree.gen.ts
 │   ├── routes/
-│   │   ├── __root.tsx       # Root layout — Navbar+Footer na klijentskim rutama
-│   │   ├── index.tsx        # Klijentska stranica (/)
+│   │   ├── __root.tsx       # Root layout — Navbar+Footer (ne na /admin)
+│   │   ├── index.tsx        # Klijentska stranica + "Admin pristup" link na dnu
 │   │   └── admin.lazy.tsx   # Admin panel (/admin)
 │   ├── components/
-│   │   ├── Navbar.tsx        # Sticky navigacija, mobile hamburger
-│   │   ├── Hero.tsx          # Landing sa slikom masaze
-│   │   ├── Services.tsx      # Usluge i cijene — klikabilne kartice
-│   │   ├── Packages.tsx      # Paketi sa uštedom
-│   │   ├── AboutMe.tsx       # Bio sa fotografijom
+│   │   ├── Navbar.tsx        # Fixed, padding-top za iPhone notch
+│   │   ├── Hero.tsx          # Landing + phone/maps linkovi
+│   │   ├── Services.tsx      # Usluge iz Convex baze
+│   │   ├── Packages.tsx      # Paketi iz Convex baze
+│   │   ├── AboutMe.tsx
 │   │   ├── BookingFlow.tsx   # Multi-step booking orchestrator
-│   │   ├── ServicePicker.tsx # Korak 1: odabir usluge
-│   │   ├── CalendarPicker.tsx# Korak 2: datum i vrijeme
-│   │   ├── MoodPicker.tsx    # Korak 3: ambijent (tišina/muzika/razgovor)
-│   │   ├── MedicalForm.tsx   # Korak 4: medicinski upitnik (samo hidžama)
-│   │   ├── BookingSummary.tsx# Korak 5: pregled i potvrda
-│   │   ├── Footer.tsx        # Footer sa linkom na admin
+│   │   ├── ServicePicker.tsx
+│   │   ├── CalendarPicker.tsx# Datum + slotovi (nedjelja UKLJUCENA)
+│   │   ├── MoodPicker.tsx
+│   │   ├── MedicalForm.tsx   # Samo za hidžamu
+│   │   ├── BookingSummary.tsx# Klijent podaci + submit
+│   │   ├── Footer.tsx         # Phone + maps linkovi, admin link
 │   │   └── admin/
-│   │       ├── AdminHeader.tsx      # Admin header sa navigacijom
-│   │       ├── DayOverview.tsx      # Današnji termini (kartice)
-│   │       ├── WeekAvailability.tsx # Sedmični prikaz smjena
-│   │       ├── DayColumn.tsx        # Jedan dan sa shift dropdownom
-│   │       ├── ShiftSelector.tsx    # Dropdown: smjena1/2/među/zatvoreno
-│   │       ├── AppointmentTable.tsx # Svi termini (tabela + mobile kartice)
-│   │       └── StatusBadge.tsx      # Status badge (potvrđen/čekanje/otkazan)
-│   ├── data/
-│   │   ├── services.ts       # Usluge, paketi, mock slotovi
-│   │   └── admin.ts         # Mock termini, smjene, dostupnost logika
+│   │       ├── AdminLogin.tsx
+│   │       ├── AdminHeader.tsx
+│   │       ├── DayOverview.tsx      # Današnji termini
+│   │       ├── WeekAvailability.tsx # Sedmica + clickable slotovi
+│   │       ├── DayColumn.tsx        # Jedan dan, expand, shift dropdown
+│   │       ├── ShiftSelector.tsx    # smjena1/smjena2/medu/zatvoreno
+│   │       ├── AppointmentTable.tsx
+│   │       └── StatusBadge.tsx
 │   ├── hooks/
-│   │   └── useBooking.ts    # Booking state machine (useReducer)
+│   │   └── useBooking.ts    # useReducer state machine
+│   ├── lib/
+│   │   ├── api.ts           # Convex API imports
+│   │   ├── convex.ts        # Convex client setup
+│   │   ├── mappers.ts       # Convex → frontend types
+│   │   └── adminSession.ts  # Session storage
 │   └── types/
-│       ├── index.ts          # Service, BookingState, TimeSlot...
-│       └── admin.ts         # Shift, Appointment, DayAvailability
-├── backend_plan.md           # Plan za Convex + Resend backend
-└── package.json
+│       ├── index.ts
+│       └── admin.ts
+└── vercel.json              # SPA rewrite rules
 ```
 
-## Klijentski sajt (/)
+---
 
-Jednostranični sajt sa sekcijama i multi-step booking flow-om.
+## Šta je implementirano
 
-### Sekcije
+### ✅ Klijentski sajt
 
-1. **Hero** — Naslov "Prostor za tvoj oporavak", CTA dugme, slika masaze (desktop)
-2. **Usluge i cijene** — 3 kategorije (Masaže, Parcijalni, Hidžama), klik na uslugu otvara booking
-3. **Paketi** — 4 paketa sa uštedom
-4. **O meni** — Bio tekst + fotografija
-5. **Zakaži termin** — Multi-step wizard
+- **Hero** — naslov, CTA, phone link (+387 62 598 756), maps link (Hajderevac, Gračanica 75320)
+- **Services** — 9 usluga iz Convex baze, 3 kategorije (Masaže, Parcijalni, Hidžama)
+- **Packages** — 4 paketa iz Convex baze
+- **AboutMe** — bio + fotka
+- **Booking Flow** — 5 koraka (usluga → datum → ambijent → medicinski → pregled)
+  - Nedjelja je SADA dostupna za zakazivanje
+  - Medicinski upitnik samo za hidžamu
+- **Footer** — clickable phone i maps linkovi, admin link
 
-### Booking Flow
+### ✅ Admin panel
 
-```
-1. Odaberi uslugu
-       ↓
-2. Odaberi datum i vrijeme
-       ↓
-3. Ambijent (Tišina / Muzika / Razgovor)
-       ↓
-4. Medicinski upitnik ── samo ako je hidžama
-       ↓
-5. Pregled i potvrda
-```
+- **Auth** — login sa šifrom (ENV: ADMIN_PASSWORD na Convex)
+- **Današnji termini** — kartice sa potvrdi/otkaži akcijama
+- **Dostupnost** — sedmični prikaz sa navigacijom
+  - Shift dropdown (smjena1/smjena2/medu/zatvoreno)
+  - Klik na sat = toggle blocked/slobodan
+  - Podaci se čuvaju u Convex bazi
+- **Svi termini** — tabela sa filterom
 
-- Klik na uslugu u "Usluge i cijene" automatski bira tu uslugu i scrolla do booking sekcije
-- Medicinski upitnik se prikazuje samo kada je odabrana usluga iz kategorije hidžama — za ostale usluge se korak preskače (4 koraka umjesto 5)
-- Booking state upravljan putem `useReducer` hook-a
+### ✅ Convex backend (production)
 
-### Smjene i dostupnost
+- **Schema:** services, packages, bookings, availability, loyalty, adminSessions
+- **Queries:** getServices, getServicePackages, getBookings, getBookingsByDate, getAvailableSlots, getWeekAvailability, getLoyaltyByPhone
+- **Mutations:** createBooking, updateBookingStatus, cancelBooking, setShift, setWeekShifts, toggleBlockedSlot, addService, updateService, toggleService
+- **Actions:** verifyAdminSession, createAdminSession, logoutAdminSession, email slanje (booking received, confirmed, cancelled, daily reminder)
 
-Smjene označavaju sate **drugog posla** — kada je terapeutkinja zauzeta drugim poslom, a ne kada radi masaže:
+### ✅ PWA
 
-| Smjena | Na drugom poslu | Slobodni za masažu |
-|--------|-------------------|---------------------|
-| Smjena 1 | 08–16 | 17, 18, 19, 20 |
-| Smjena 2 | 13–21 | 08, 09, 10, 11 |
-| Među | 10–18 | 08, 09, 19, 20 |
-| — (nije odabrano) | — | Svi slobodni |
-| Zatvoreno | — | Svi zauzeti |
+- manifest.json sa icon.svg
+- Service Worker (cache + offline)
+- Apple meta tagi (standalone mode)
+- Safe area insets za iPhone notch
+- "Add to Home Screen" funkcioniše
 
-Trenutno koristi mock podatke — kada se Convex backend implementira, dostupnost će se čitati iz baze.
+### ✅ Email (Resend)
 
-## Admin panel (/admin)
+- Termin primljen → klijent
+- Termin potvrđen → klijent  
+- Termin otkazan → klijent
+- Podsjetnik 24h prije → klijent
+- Novi termin → admin
 
-Zasebna stranica sa vlastitim headerom (bez klijentskog Navbar/Footer).
-
-### Sekcije
-
-1. **Današnji termini** — Kartice sa klijentima, uslugom, statusom + akcije (potvrdi/otkaži)
-2. **Dostupnost** — Sedmični prikaz sa navigacijom, svaki dan ima vlastitu smjenu dropdown
-3. **Svi termini** — Tabela (desktop) / kartice (mobile) sa svim rezervacijama
-
-### Mobile-first
-
-- Svi touch targeti minimalno 44px (Apple preporuka)
-- Admin header sa hamburger menijem na mobilnom
-- AppointmentTable prikazuje kartice na mobilnom, tabelu na desktopu
-- DayColumn slot grid 4 kolone na mobilnom, 6 na desktopu
-- `safe-area-inset` padding za iPhone notch
-- PWA standalone mode bez overscroll bounce
-
-## PWA podrška
-
-- `manifest.json` — standalone display, theme_color, ikona
-- `sw.js` — stale-while-revalidate caching strategija
-- Meta tagovi — `apple-mobile-web-app-capable`, `theme-color`, `viewport-fit=cover`
-- Auto-registracija service workera u `index.html`
+---
 
 ## Dizajn sistem
 
 | Token | Upotreba |
 |-------|----------|
-| `sage-*` | Primarna boja (zelena), CTA dugmad, aktivni elementi |
-| `cream-*` | Pozadine, kartice, borderi |
-| `terra-*` | Akcent (terakota), upozorenja, zatvoreni slotovi |
-| `warm-*` | Tekst, sekundarni elementi |
-| `Playfair Display` | Naslovi (font-serif) |
-| `Inter` | Body tekst (font-sans) |
+| `sage-*` | Primarna (zelena), CTA, aktivni |
+| `cream-*` | Pozadine, kartice |
+| `terra-*` | Akcent (terakota), warning, blocked |
+| `warm-*` | Tekst |
+| `Playfair Display` | Naslovi (serif) |
+| `Inter` | Body |
 
-## Backend — Sljedeći koraci
+---
 
-Kompletna specifikacija backend implementacije sa Convex bazom i Resend.com emailovima se nalazi u **[backend_plan.md](./backend_plan.md)**.
+## Admin pristup
 
-Ključne tačke:
-- Convex za real-time bazu, queries i mutations
-- Resend.com za email potvrde, podsjetnike i obavještenja adminu
-- Booking uvijek ide u "čekanje" — admin potvrđuje ručno
-- Loyalty sistem po broju telefona
-- Cron job za dnevne podsjetnike 24h prije termina
+- URL: https://zen-zone-besic.vercel.app/admin
+- Šifra: postavljena via `npx convex env set ADMIN_PASSWORD "..." --prod`
+
+## Environment varijable (Convex)
+
+```
+ADMIN_PASSWORD    — admin šifra za prijavu
+RESEND_API_KEY    — za email slanje (opcionalno)
+```
+
+---
+
+## Kako seed-ati usluge (ako treba)
+
+```bash
+npx convex run --prod seed:seedServicesAndPackages
+```
+
+Output: `{ services: 9, packages: 4 }`
