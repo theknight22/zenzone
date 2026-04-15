@@ -7,9 +7,19 @@ export function Hero() {
       <div className="absolute top-20 right-10 w-64 h-64 bg-sage-200/30 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-10 w-48 h-48 bg-terra-200/20 rounded-full blur-3xl" />
 
+      {/* Mobile background image */}
+      <div className="md:hidden absolute inset-0 z-0">
+        <img
+          src="/masaza.jpg"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-sage-50/90 via-cream-50/80 to-cream-100/90 backdrop-blur-sm" />
+      </div>
+
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-8 items-center">
         {/* Text */}
-        <div className="text-center md:text-left">
+        <div className="relative z-10 text-center md:text-left">
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-sage-800 mb-4 leading-tight">
             Prostor za<br />
             <span className="text-terra-500">tvoj oporavak</span>
