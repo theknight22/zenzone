@@ -28,11 +28,6 @@ function HomePage() {
       <Packages />
       <AboutMe />
       <BookingFlow booking={booking} dispatch={dispatch} />
-      <div className="text-center pb-8">
-        <Link to="/admin" className="text-xs text-warm-300 hover:text-sage-500 transition-colors">
-          Admin pristup
-        </Link>
-      </div>
     </>
   );
 }
