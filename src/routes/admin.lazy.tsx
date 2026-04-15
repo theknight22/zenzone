@@ -128,8 +128,10 @@ function AdminPage() {
 
   function handleToggleSlot(date: string, time: string) {
     if (!verifiedSession) {
+      console.log('No verified session');
       return;
     }
+    console.log('Calling toggleBlockedSlot with:', { date, time, sessionToken: verifiedSession.sessionToken });
     toggleBlockedSlot({ date, time, sessionToken: verifiedSession.sessionToken });
   }
 
