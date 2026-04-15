@@ -43,6 +43,7 @@ export const getAvailableSlots = query({
       .first();
 
     const shift = record?.shift ?? "";
+    const blockedSlots: string[] = record?.blockedSlots ?? [];
     const bookings = await ctx.db
       .query("bookings")
       .withIndex("by_date_time", (q) => q.eq("date", args.date))
@@ -50,13 +51,16 @@ export const getAvailableSlots = query({
 
     const slots = getAvailableSlotsForDay(shift, bookings);
     if (args.date !== getTodayString()) {
-      return slots;
+      return slots.map((slot) => ({
+        time: slot.time,
+        available: slot.available && !blockedSlots.includes(slot.time),
+      }));
     }
 
     const currentHour = getHourInTimeZone();
     return slots.map((slot) => ({
       time: slot.time,
-      available: slot.available && parseInt(slot.time.split(":")[0], 10) > currentHour,
+      available: slot.available && !blockedSlots.includes(slot.time) && parseInt(slot.time.split(":")[0], 10) > currentHour,
     }));
   },
 });
