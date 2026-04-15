@@ -61,9 +61,10 @@ export function mapConvexBooking(doc: ConvexDoc): Appointment {
 /**
  * Map Convex availability records to DayAvailability[].
  */
-export function mapConvexAvailability(docs: ConvexDoc[]): { date: string; shift: Shift }[] {
+export function mapConvexAvailability(docs: ConvexDoc[]): { date: string; shift: Shift; blockedSlots: string[] }[] {
   return docs.map((doc) => ({
     date: doc.date,
     shift: (doc.shift || null) as Shift,
+    blockedSlots: doc.blockedSlots ?? [],
   }));
 }
