@@ -43,6 +43,7 @@ export default defineSchema({
   availability: defineTable({
     date: v.string(), // "YYYY-MM-DD"
     shift: v.string(), // "smjena1" | "smjena2" | "medu" | "zatvoreno" | ""
+    blockedSlots: v.array(v.string()), // ["09:00", "10:00"] - individually blocked times
   }).index("by_date", ["date"]),
 
   loyalty: defineTable({

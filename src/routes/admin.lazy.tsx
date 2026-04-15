@@ -104,6 +104,7 @@ function AdminPage() {
   // Convex mutations
   const updateBookingStatus = useMutation(api.mutations.bookings.updateBookingStatus);
   const setShift = useMutation(api.mutations.availability.setShift);
+  const toggleBlockedSlot = useMutation(api.mutations.availability.toggleBlockedSlot);
 
   // Map to frontend types
   const appointments: Appointment[] = (bookingsData ?? []).map(mapConvexBooking);
@@ -123,6 +124,13 @@ function AdminPage() {
       return;
     }
     setShift({ date, shift: shift ?? '', sessionToken: verifiedSession.sessionToken });
+  }
+
+  function handleToggleSlot(date: string, time: string) {
+    if (!verifiedSession) {
+      return;
+    }
+    toggleBlockedSlot({ date, time, sessionToken: verifiedSession.sessionToken });
   }
 
   function handleLogin(nextSession: AdminSession) {
@@ -180,6 +188,7 @@ function AdminPage() {
             weekOffset={weekOffset}
             onWeekOffsetChange={setWeekOffset}
             onShiftChange={handleShiftChange}
+            onToggleSlot={handleToggleSlot}
           />
         </section>
 

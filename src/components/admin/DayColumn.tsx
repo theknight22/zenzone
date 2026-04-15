@@ -6,20 +6,22 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 interface Props {
   date: Date;
   shift: Shift;
+  blockedSlots: string[];
   isExpanded: boolean;
   onShiftChange: (shift: Shift) => void;
   onToggleExpand: () => void;
+  onToggleSlot: (time: string) => void;
 }
 
 function fmtDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export function DayColumn({ date, shift, isExpanded, onShiftChange, onToggleExpand }: Props) {
+export function DayColumn({ date, shift, blockedSlots, isExpanded, onShiftChange, onToggleExpand, onToggleSlot }: Props) {
   const dayName = DAYS_BA[(date.getDay() + 6) % 7];
   const dayNum = date.getDate();
   const monthName = MONTHS_BA[date.getMonth()];
-  const slots = getSlotsForShift(shift);
+  const slots = getSlotsForShift(shift, blockedSlots);
   const availableCount = slots.filter((s) => s.available).length;
 
   const isToday = fmtDate(date) === fmtDate(new Date());
@@ -65,20 +67,21 @@ export function DayColumn({ date, shift, isExpanded, onShiftChange, onToggleExpa
       {isExpanded && (
         <div className="px-4 pb-4 border-t border-cream-100 pt-3">
           <p className="text-xs text-warm-400 mb-2">
-            Zeleno = slobodan za masažu, crveno = zauzet drugim poslom
+            Klikni na sat da blokiraš/odblokiraš termin
           </p>
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
             {slots.map((slot) => (
-              <div
+              <button
                 key={slot.time}
-                className={`text-xs text-center py-2 px-1 rounded-lg font-medium min-h-[44px] flex items-center justify-center ${
-                  slot.available
-                    ? 'bg-sage-50 text-sage-700 border border-sage-200'
-                    : 'bg-terra-50 text-terra-600 border border-terra-200'
+                onClick={() => onToggleSlot(slot.time)}
+                className={`text-xs text-center py-2 px-1 rounded-lg font-medium min-h-[44px] flex items-center justify-center transition-colors active:scale-95 ${
+                  slot.blocked
+                    ? 'bg-terra-100 text-terra-600 border-2 border-terra-400 cursor-pointer hover:bg-terra-200'
+                    : 'bg-sage-50 text-sage-700 border border-sage-200 cursor-pointer hover:bg-sage-100'
                 }`}
               >
                 {slot.time}
-              </div>
+              </button>
             ))}
           </div>
         </div>

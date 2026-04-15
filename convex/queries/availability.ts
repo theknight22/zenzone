@@ -27,6 +27,7 @@ export const getWeekAvailability = query({
       result.push({
         date,
         shift: record?.shift ?? "",
+        blockedSlots: record?.blockedSlots ?? [],
       });
     }
     return result;

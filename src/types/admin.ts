@@ -5,6 +5,7 @@ export type Shift = 'smjena1' | 'smjena2' | 'medu' | 'zatvoreno' | null;
 export interface DayAvailability {
   date: string;
   shift: Shift;
+  blockedSlots: string[];
 }
 
 export type AppointmentStatus = 'potvrđen' | 'čekanje' | 'otkazan';

@@ -9,13 +9,14 @@ interface Props {
   weekOffset: number;
   onWeekOffsetChange: (offset: number) => void;
   onShiftChange: (date: string, shift: Shift) => void;
+  onToggleSlot: (date: string, time: string) => void;
 }
 
 function fmtDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export function WeekAvailability({ availability, weekOffset, onWeekOffsetChange, onShiftChange }: Props) {
+export function WeekAvailability({ availability, weekOffset, onWeekOffsetChange, onShiftChange, onToggleSlot }: Props) {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   const weekDates = getWeekDates(weekOffset);
@@ -26,6 +27,11 @@ export function WeekAvailability({ availability, weekOffset, onWeekOffsetChange,
   function getShiftForDate(date: string): Shift {
     const entry = availability.find((a) => a.date === date);
     return entry?.shift ?? null;
+  }
+
+  function getBlockedSlotsForDate(date: string): string[] {
+    const entry = availability.find((a) => a.date === date);
+    return entry?.blockedSlots ?? [];
   }
 
   return (
@@ -72,9 +78,11 @@ export function WeekAvailability({ availability, weekOffset, onWeekOffsetChange,
               key={dateStr}
               date={date}
               shift={getShiftForDate(dateStr)}
+              blockedSlots={getBlockedSlotsForDate(dateStr)}
               isExpanded={isExpanded}
               onShiftChange={(shift) => onShiftChange(dateStr, shift)}
               onToggleExpand={() => setExpandedDay(isExpanded ? null : dateStr)}
+              onToggleSlot={(time) => onToggleSlot(dateStr, time)}
             />
           );
         })}

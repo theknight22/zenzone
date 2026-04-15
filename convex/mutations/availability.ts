@@ -18,11 +18,12 @@ export const setShift = mutation({
       .first();
 
     if (existing) {
-      await ctx.db.patch(existing._id, { shift: args.shift });
+      await ctx.db.patch(existing._id, { shift: args.shift, blockedSlots: existing.blockedSlots ?? [] });
     } else {
       await ctx.db.insert("availability", {
         date: args.date,
         shift: args.shift,
+        blockedSlots: [],
       });
     }
   },
@@ -41,7 +42,6 @@ export const setWeekShifts = mutation({
       throw new Error("Potrebno je tačno 7 smjena za sedmicu.");
     }
 
-    // Compute the 7 date strings for this week offset
     const now = new Date();
     const dayOfWeek = (now.getDay() + 6) % 7;
     const monday = new Date(now);
@@ -63,8 +63,42 @@ export const setWeekShifts = mutation({
         await ctx.db.insert("availability", {
           date: dateStr,
           shift: args.shifts[i],
+          blockedSlots: [],
         });
       }
+    }
+  },
+});
+
+export const toggleBlockedSlot = mutation({
+  args: {
+    date: v.string(),
+    time: v.string(),
+    sessionToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.sessionToken);
+
+    const existing = await ctx.db
+      .query("availability")
+      .withIndex("by_date", (q) => q.eq("date", args.date))
+      .first();
+
+    const blockedSlots = existing?.blockedSlots ?? [];
+    const isBlocked = blockedSlots.includes(args.time);
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        blockedSlots: isBlocked
+          ? blockedSlots.filter((t) => t !== args.time)
+          : [...blockedSlots, args.time],
+      });
+    } else {
+      await ctx.db.insert("availability", {
+        date: args.date,
+        shift: "",
+        blockedSlots: [args.time],
+      });
     }
   },
 });
