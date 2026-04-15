@@ -14,7 +14,7 @@ export function Hero() {
           alt=""
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-sage-50/90 via-cream-50/80 to-cream-100/90 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-br from-sage-50/60 via-cream-50/50 to-cream-100/60 backdrop-blur-sm" />
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-8 items-center">
