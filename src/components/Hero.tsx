@@ -2,13 +2,13 @@ import { ArrowDown, MapPin, Phone } from 'lucide-react';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-sage-50 via-cream-50 to-cream-100 pt-20 pb-16 sm:pt-24 sm:pb-20">
+    <section className="relative overflow-hidden bg-gradient-to-br from-sage-50 via-cream-50 to-cream-100 pt-[calc(env(safe-area-inset-top)+5.75rem)] pb-16 sm:pt-28 sm:pb-20">
       <div className="absolute -top-16 -left-12 h-72 w-72 rounded-full bg-sage-200/50 blur-3xl" />
       <div className="absolute -bottom-20 right-0 h-72 w-72 rounded-full bg-terra-200/40 blur-3xl" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(122,140,102,0.08),transparent_42%),radial-gradient(circle_at_80%_70%,rgba(214,115,69,0.08),transparent_38%)]" />
 
       <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-[1.05fr_0.95fr] md:items-center">
-        <div className="flex min-h-[calc(100svh-8.5rem)] flex-col justify-center text-center md:min-h-0 md:text-left">
+        <div className="flex min-h-[calc(100svh-env(safe-area-inset-top)-9.5rem)] flex-col justify-center text-center sm:min-h-[calc(100svh-10rem)] md:min-h-0 md:text-left">
           <h1 className="mx-auto text-center font-serif text-4xl leading-tight text-sage-800 sm:text-5xl md:mx-0 md:text-left md:text-6xl">
             Prostor za
             <span className="block text-terra-500">tvoj oporavak</span>

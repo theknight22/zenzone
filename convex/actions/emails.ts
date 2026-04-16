@@ -17,32 +17,41 @@ async function sendEmail({
   to: string;
   subject: string;
   html: string;
-}) {
+}): Promise<boolean> {
   const recipient = to.trim();
   if (!recipient) {
     console.info("Recipient email is empty. Skipping email.");
-    return;
+    return false;
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error("RESEND_API_KEY is not set. Skipping email.");
-    return;
+    return false;
   }
 
-  await fetch("https://api.resend.com/emails", {
+  const from = process.env.RESEND_FROM?.trim() || "ZenZone <onboarding@resend.dev>";
+  const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "ZenZone <onboarding@resend.dev>",
+      from,
       to: recipient,
       subject,
       html,
     }),
   });
+
+  if (!response.ok) {
+    const body = await response.text();
+    console.error(`Resend API error (${response.status}): ${body}`);
+    return false;
+  }
+
+  return true;
 }
 
 function emailHeader(): string {
@@ -65,25 +74,52 @@ function emailFooter(): string {
 
 function bookingDetailsHtml(data: {
   serviceName: string;
+  servicePrice: number;
   date: string;
   time: string;
   mood: string;
+  status: string;
   clientName: string;
+  clientPhone: string;
 }): string {
   const moodLabels: Record<string, string> = {
     tisina: "Tišina",
     muzika: "Muzika",
     razgovor: "Razgovor",
   };
+  const statusLabels: Record<string, string> = {
+    čekanje: "Čeka potvrdu",
+    potvrđen: "Potvrđen",
+    otkazan: "Otkazan",
+  };
   return `
     <div style="background:#f6f7f4;border-radius:12px;padding:16px;margin:16px 0;">
       <table style="width:100%;font-size:14px;color:#6f5f4b;">
         <tr><td style="padding:4px 0;color:#95a380;">Usluga</td><td style="padding:4px 0;text-align:right;font-weight:600;">${data.serviceName}</td></tr>
+        <tr><td style="padding:4px 0;color:#95a380;">Cijena</td><td style="padding:4px 0;text-align:right;font-weight:600;">${data.servicePrice} KM</td></tr>
         <tr><td style="padding:4px 0;color:#95a380;">Datum</td><td style="padding:4px 0;text-align:right;font-weight:600;">${data.date}</td></tr>
         <tr><td style="padding:4px 0;color:#95a380;">Vrijeme</td><td style="padding:4px 0;text-align:right;font-weight:600;">${data.time}</td></tr>
         <tr><td style="padding:4px 0;color:#95a380;">Ambijent</td><td style="padding:4px 0;text-align:right;font-weight:600;">${moodLabels[data.mood] ?? data.mood}</td></tr>
+        <tr><td style="padding:4px 0;color:#95a380;">Status</td><td style="padding:4px 0;text-align:right;font-weight:600;">${statusLabels[data.status] ?? data.status}</td></tr>
         <tr><td style="padding:4px 0;color:#95a380;">Klijent</td><td style="padding:4px 0;text-align:right;font-weight:600;">${data.clientName}</td></tr>
+        <tr><td style="padding:4px 0;color:#95a380;">Telefon</td><td style="padding:4px 0;text-align:right;font-weight:600;">${data.clientPhone}</td></tr>
       </table>
+    </div>`;
+}
+
+function normalizePhone(phone: string): string {
+  return phone.replace(/[\s-]/g, "");
+}
+
+function loyaltyHtml(visitCount: number): string {
+  const toFirstReward = Math.max(5 - visitCount, 0);
+  return `
+    <div style="background:#f6f7f4;border-radius:12px;padding:16px;margin:16px 0;">
+      <p style="margin:0 0 8px;color:#4c5841;font-weight:700;font-size:14px;">Loyalty program</p>
+      <p style="margin:0;color:#6f5f4b;font-size:14px;">Trenutno stanje: <strong>${visitCount} bodova</strong></p>
+      <p style="margin:8px 0 0;color:#6f5f4b;font-size:13px;">5 bodova = 20 KM popusta</p>
+      <p style="margin:4px 0 0;color:#6f5f4b;font-size:13px;">10 bodova = gratis parcijalna masaža ili masaža (bez hidžame)</p>
+      ${toFirstReward > 0 ? `<p style="margin:8px 0 0;color:#95a380;font-size:12px;">Do prve nagrade treba još ${toFirstReward} bodova.</p>` : ""}
     </div>`;
 }
 
@@ -94,6 +130,11 @@ export const sendBookingReceived = action({
       id: args.bookingId,
     });
     if (!booking) return;
+    const normalizedPhone = normalizePhone(booking.clientPhone);
+    const loyalty = normalizedPhone
+      ? await ctx.runQuery(api.queries.loyalty.getLoyaltyByPhone, { phone: normalizedPhone })
+      : null;
+    const visitCount = loyalty?.visitCount ?? 0;
 
     const isHidzama = booking.serviceCategory === "hidzama";
     const hidzamaTip = isHidzama
@@ -110,11 +151,15 @@ export const sendBookingReceived = action({
       </p>
       ${bookingDetailsHtml({
         serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice,
         date: booking.date,
         time: booking.time,
         mood: booking.mood,
+        status: booking.status,
         clientName: booking.clientName,
+        clientPhone: booking.clientPhone,
       })}
+      ${loyaltyHtml(visitCount)}
       ${hidzamaTip}
       <p style="color:#95a380;font-size:13px;">Odobrenje termina ćete dobiti uskoro na ovu email adresu.</p>
       ${emailFooter()}`;
@@ -134,6 +179,11 @@ export const sendBookingConfirmed = action({
       id: args.bookingId,
     });
     if (!booking) return;
+    const normalizedPhone = normalizePhone(booking.clientPhone);
+    const loyalty = normalizedPhone
+      ? await ctx.runQuery(api.queries.loyalty.getLoyaltyByPhone, { phone: normalizedPhone })
+      : null;
+    const visitCount = loyalty?.visitCount ?? 0;
 
     const html = `
       ${emailHeader()}
@@ -143,11 +193,15 @@ export const sendBookingConfirmed = action({
       </p>
       ${bookingDetailsHtml({
         serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice,
         date: booking.date,
         time: booking.time,
         mood: booking.mood,
+        status: booking.status,
         clientName: booking.clientName,
+        clientPhone: booking.clientPhone,
       })}
+      ${loyaltyHtml(visitCount)}
       <p style="color:#6f5f4b;font-size:13px;">Molimo dođite 5 minuta ranije. Vidimo se!</p>
       ${emailFooter()}`;
 
@@ -175,10 +229,13 @@ export const sendBookingCancelled = action({
       </p>
       ${bookingDetailsHtml({
         serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice,
         date: booking.date,
         time: booking.time,
         mood: booking.mood,
+        status: booking.status,
         clientName: booking.clientName,
+        clientPhone: booking.clientPhone,
       })}
       <p style="color:#6f5f4b;font-size:13px;">Možete zakazati novi termin na našoj stranici. Nadamo se da ćete doći uskoro!</p>
       ${emailFooter()}`;
@@ -214,10 +271,13 @@ export const sendDailyReminder = action({
       </p>
       ${bookingDetailsHtml({
         serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice,
         date: booking.date,
         time: booking.time,
         mood: booking.mood,
+        status: booking.status,
         clientName: booking.clientName,
+        clientPhone: booking.clientPhone,
       })}
       ${waterTip}
       <p style="color:#6f5f4b;font-size:13px;">Dođite 5 minuta ranije. Vidimo se sutra!</p>
@@ -253,10 +313,13 @@ export const sendNewBookingAdmin = action({
       </p>
       ${bookingDetailsHtml({
         serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice,
         date: booking.date,
         time: booking.time,
         mood: booking.mood,
+        status: booking.status,
         clientName: booking.clientName,
+        clientPhone: booking.clientPhone,
       })}
       <div style="background:#f6f7f4;border-radius:8px;padding:12px;margin:12px 0;font-size:13px;color:#6f5f4b;">
         <p style="margin:0 0 4px;"><strong>Telefon:</strong> ${booking.clientPhone}</p>
