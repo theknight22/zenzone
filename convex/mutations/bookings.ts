@@ -31,11 +31,11 @@ export const createBooking = mutation({
     const clientPhone = args.clientPhone.trim();
     const referralSource = args.referralSource.trim();
 
-    if (!clientName || !clientEmail || !clientPhone) {
-      throw new Error("Ime, email i telefon su obavezni.");
+    if (!clientName || !clientPhone) {
+      throw new Error("Ime i telefon su obavezni.");
     }
 
-    if (!isValidEmail(clientEmail)) {
+    if (clientEmail && !isValidEmail(clientEmail)) {
       throw new Error("Unesite ispravnu email adresu.");
     }
 

@@ -9,15 +9,6 @@ export interface Service {
 
 export type ServiceCategory = 'masaze' | 'parcijalni' | 'hidzama';
 
-export interface ServicePackage {
-  id: string;
-  name: string;
-  description: string;
-  originalPrice: number;
-  price: number;
-  terms: string;
-}
-
 export type Mood = 'tisina' | 'muzika' | 'razgovor';
 
 export interface BookingState {

@@ -1,71 +1,68 @@
-import { Gift, TrendingDown, Loader2 } from 'lucide-react';
-import { useQuery } from 'convex/react';
-import { api } from '@/lib/api';
-import { mapConvexPackage } from '@/lib/mappers';
-import type { ServicePackage } from '@/types';
+import { Gift, Sparkles, Target } from 'lucide-react';
+
+const programRules = [
+  {
+    title: '1 termin = 1 bod',
+    description: 'Svaka realizovana usluga donosi 1 bod na tvoj broj telefona.',
+    icon: <Target className="w-5 h-5" />,
+  },
+  {
+    title: '5 bodova = 20 KM popusta',
+    description: 'Popust koristiš na sljedeći termin kada skupiš 5 bodova.',
+    icon: <Gift className="w-5 h-5" />,
+  },
+  {
+    title: '10 bodova = gratis masaža',
+    description: 'Nagradu biraš: jedna parcijalna masaža ili masaža. Hidžama nije uključena.',
+    icon: <Sparkles className="w-5 h-5" />,
+  },
+] as const;
+
+const programNotes = [
+  'Bodovi važe 12 mjeseci od datuma sticanja.',
+  'Bodovi se ne mogu zamijeniti za gotovinu.',
+  'Loyalty pogodnosti se ne kombinuju sa drugim promo akcijama.',
+  'Praćenje bodova je vezano za tvoj broj telefona.',
+] as const;
 
 export function Packages() {
-  const packagesData = useQuery(api.queries.services.getServicePackages);
-  const packages: ServicePackage[] = (packagesData ?? []).map(mapConvexPackage);
-
   return (
-    <section id="paketi" className="py-20 px-4 sm:px-6 bg-sage-50/50">
+    <section id="loyalty" className="py-20 px-4 sm:px-6 bg-sage-50/50">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <h2 className="font-serif text-3xl sm:text-4xl text-sage-800 mb-3">Paketi usluga</h2>
+          <h2 className="font-serif text-3xl sm:text-4xl text-sage-800 mb-3">Loyalty program</h2>
           <p className="text-warm-500 max-w-md mx-auto">
-            Uštedi uz redovnu njegu — tvoje tijelo će ti zahvaliti.
+            Nema paketa. Svaki dolazak ti donosi bodove i jasne nagrade.
+          </p>
+          <p className="text-sage-600 text-sm mt-2 font-medium">
+            Bodovi važe 12 mjeseci.
           </p>
         </div>
 
-        {packagesData === undefined ? (
-          <div className="flex items-center justify-center py-12 text-warm-400">
-            <Loader2 className="w-5 h-5 animate-spin mr-2" />
-            <span>Učitavanje paketa...</span>
-          </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {packages.map((pkg) => {
-              const hasDiscount = pkg.originalPrice > 0;
-              const savings = pkg.originalPrice - pkg.price;
+        <div className="grid md:grid-cols-3 gap-6">
+          {programRules.map((rule) => (
+            <article
+              key={rule.title}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-cream-200"
+            >
+              <div className="inline-flex items-center gap-2 rounded-full bg-sage-100 px-3 py-1 text-xs font-semibold text-sage-700 mb-4">
+                {rule.icon}
+                Pravilo
+              </div>
+              <h3 className="font-serif text-2xl text-sage-800 leading-tight">{rule.title}</h3>
+              <p className="text-warm-600 mt-3 leading-relaxed">{rule.description}</p>
+            </article>
+          ))}
+        </div>
 
-              return (
-                <div
-                  key={pkg.id}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-cream-200 flex flex-col"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    {pkg.id === 'reset-sistem' ? (
-                      <Gift className="w-5 h-5 text-terra-500" />
-                    ) : (
-                      <TrendingDown className="w-5 h-5 text-sage-500" />
-                    )}
-                    <span className="text-xs font-medium text-warm-400 bg-cream-100 px-2 py-0.5 rounded-full">
-                      {pkg.terms}
-                    </span>
-                  </div>
-
-                  <h3 className="font-serif text-lg text-sage-800 mb-1">{pkg.name}</h3>
-                  <p className="text-warm-400 text-sm flex-1">{pkg.description}</p>
-
-                  <div className="mt-4 pt-4 border-t border-cream-100">
-                    {hasDiscount ? (
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-sage-700 font-bold text-xl">{pkg.price} KM</span>
-                        <span className="text-warm-300 line-through text-sm">{pkg.originalPrice} KM</span>
-                        <span className="text-terra-500 text-xs font-medium ml-auto">
-                          Ušteda {savings} KM
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-terra-500 font-semibold text-sm">Gratis termin!</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="mt-8 bg-white rounded-2xl p-6 sm:p-7 shadow-sm border border-cream-200">
+          <h3 className="font-serif text-2xl text-sage-800">Uslovi loyalty programa</h3>
+          <ul className="mt-4 list-disc pl-5 space-y-2 text-sm text-warm-700">
+            {programNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

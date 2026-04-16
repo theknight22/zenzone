@@ -11,15 +11,6 @@ export default defineSchema({
     active: v.boolean(),
   }),
 
-  packages: defineTable({
-    name: v.string(),
-    description: v.string(),
-    originalPrice: v.number(),
-    price: v.number(),
-    terms: v.string(),
-    active: v.boolean(),
-  }),
-
   bookings: defineTable({
     serviceId: v.id("services"),
     date: v.string(), // "YYYY-MM-DD"

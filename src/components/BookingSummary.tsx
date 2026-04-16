@@ -20,7 +20,7 @@ export function BookingSummary({ booking, dispatch, onConfirm, isSubmitting }: P
   const isHidzama = service?.category === 'hidzama';
   const medicalAllChecked = Object.values(medicalChecks).every(Boolean);
   const canConfirm = service && date && time && mood && (!isHidzama || medicalAllChecked)
-    && clientName.trim() && clientEmail.trim() && clientPhone.trim();
+    && clientName.trim() && clientPhone.trim();
 
   // Loyalty lookup
   const normalizedPhone = clientPhone.replace(/[\s-]/g, '');
@@ -80,7 +80,7 @@ export function BookingSummary({ booking, dispatch, onConfirm, isSubmitting }: P
           </div>
 
           <div>
-            <label htmlFor="clientEmail" className="block text-xs text-warm-500 mb-1">Email *</label>
+            <label htmlFor="clientEmail" className="block text-xs text-warm-500 mb-1">Email (opcionalno)</label>
             <input
               id="clientEmail"
               type="email"
@@ -111,7 +111,7 @@ export function BookingSummary({ booking, dispatch, onConfirm, isSubmitting }: P
 
         <div className="px-5 py-4 bg-sage-50">
           <p className="text-xs text-sage-600">
-            Dobit ćete podsjetnik 24h prije termina. Nakon tretmana ćete dobiti savjet za hidrataciju.
+            Ako unesete email, dobit ćete podsjetnik 24h prije termina. Nakon tretmana ćete dobiti savjet za hidrataciju.
           </p>
         </div>
       </div>

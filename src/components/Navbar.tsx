@@ -3,7 +3,7 @@ import { Flower2 } from 'lucide-react';
 
 const navLinks = [
   { href: '#usluge', label: 'Usluge' },
-  { href: '#paketi', label: 'Paketi' },
+  { href: '#loyalty', label: 'Loyalty' },
   { href: '#o-menii', label: 'O meni' },
   { href: '#zakazi', label: 'Zakaži termin' },
 ];

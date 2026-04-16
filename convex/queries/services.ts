@@ -7,11 +7,3 @@ export const getServices = query({
     return services.filter((s) => s.active);
   },
 });
-
-export const getServicePackages = query({
-  args: {},
-  handler: async (ctx) => {
-    const packages = await ctx.db.query("packages").collect();
-    return packages.filter((p) => p.active);
-  },
-});

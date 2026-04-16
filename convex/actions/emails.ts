@@ -18,6 +18,12 @@ async function sendEmail({
   subject: string;
   html: string;
 }) {
+  const recipient = to.trim();
+  if (!recipient) {
+    console.info("Recipient email is empty. Skipping email.");
+    return;
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error("RESEND_API_KEY is not set. Skipping email.");
@@ -32,7 +38,7 @@ async function sendEmail({
     },
     body: JSON.stringify({
       from: "ZenZone <onboarding@resend.dev>",
-      to,
+      to: recipient,
       subject,
       html,
     }),

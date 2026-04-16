@@ -41,7 +41,7 @@ export function Footer() {
             <h4 className="text-white font-medium text-sm mb-3">Brzi linkovi</h4>
             <div className="space-y-2 text-sage-300 text-sm">
               <a href="#usluge" className="block hover:text-white transition-colors">Usluge</a>
-              <a href="#paketi" className="block hover:text-white transition-colors">Paketi</a>
+              <a href="#loyalty" className="block hover:text-white transition-colors">Loyalty</a>
               <a href="#o-menii" className="block hover:text-white transition-colors">O meni</a>
               <a href="#zakazi" className="block hover:text-white transition-colors">Zakaži termin</a>
               <Link to="/admin" className="block hover:text-white transition-colors">Admin</Link>

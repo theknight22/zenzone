@@ -66,12 +66,12 @@ npx convex deploy --prod    # Convex backend
 ```
 zenzone/
 ├── convex/                  # Convex backend
-│   ├── schema.ts            # Tabele: services, packages, bookings, availability, loyalty, adminSessions
+│   ├── schema.ts            # Tabele: services, bookings, availability, loyalty, adminSessions
 │   ├── queries/             # getServices, getBookings, getAvailableSlots, getWeekAvailability
 │   ├── mutations/           # createBooking, updateBookingStatus, setShift, toggleBlockedSlot
 │   ├── actions/             # Resend email slanje, auth verifikacija
 │   ├── lib/                 # adminAuth, slots helper, constants
-│   ├── seed.ts              # seedServicesAndPackages funkcija
+│   ├── seed.ts              # seedServices funkcija
 │   └── _generated/          # Auto-generated Convex types
 ├── public/
 │   ├── masaza.jpg
@@ -93,7 +93,7 @@ zenzone/
 │   │   ├── Navbar.tsx        # Fixed, padding-top za iPhone notch
 │   │   ├── Hero.tsx          # Landing + phone/maps linkovi
 │   │   ├── Services.tsx      # Usluge iz Convex baze
-│   │   ├── Packages.tsx      # Paketi iz Convex baze
+│   │   ├── Packages.tsx      # Loyalty program sekcija
 │   │   ├── AboutMe.tsx
 │   │   ├── BookingFlow.tsx   # Multi-step booking orchestrator
 │   │   ├── ServicePicker.tsx
@@ -132,7 +132,7 @@ zenzone/
 
 - **Hero** — naslov, CTA, phone link (+387 62 598 756), maps link (Hajderevac, Gračanica 75320)
 - **Services** — 9 usluga iz Convex baze, 3 kategorije (Masaže, Parcijalni, Hidžama)
-- **Packages** — 4 paketa iz Convex baze
+- **Loyalty program** — pravila bodova i nagrada
 - **AboutMe** — bio + fotka
 - **Booking Flow** — 5 koraka (usluga → datum → ambijent → medicinski → pregled)
   - Nedjelja je SADA dostupna za zakazivanje
@@ -151,8 +151,8 @@ zenzone/
 
 ### ✅ Convex backend (production)
 
-- **Schema:** services, packages, bookings, availability, loyalty, adminSessions
-- **Queries:** getServices, getServicePackages, getBookings, getBookingsByDate, getAvailableSlots, getWeekAvailability, getLoyaltyByPhone
+- **Schema:** services, bookings, availability, loyalty, adminSessions
+- **Queries:** getServices, getBookings, getBookingsByDate, getAvailableSlots, getWeekAvailability, getLoyaltyByPhone
 - **Mutations:** createBooking, updateBookingStatus, cancelBooking, setShift, setWeekShifts, toggleBlockedSlot, addService, updateService, toggleService
 - **Actions:** verifyAdminSession, createAdminSession, logoutAdminSession, email slanje (booking received, confirmed, cancelled, daily reminder)
 
@@ -204,7 +204,7 @@ RESEND_API_KEY    — za email slanje (opcionalno)
 ## Kako seed-ati usluge (ako treba)
 
 ```bash
-npx convex run --prod seed:seedServicesAndPackages
+npx convex run --prod seed:seedServices
 ```
 
-Output: `{ services: 9, packages: 4 }`
+Output: `{ services: 9 }`

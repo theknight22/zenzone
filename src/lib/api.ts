@@ -19,7 +19,6 @@ export const api = {
   queries: {
     services: {
       getServices: q("queries/services:getServices"),
-      getServicePackages: q("queries/services:getServicePackages"),
     },
     bookings: {
       getBookings: q<{ sessionToken: string; status?: string }>("queries/bookings:getBookings"),
@@ -78,6 +77,6 @@ export const api = {
     dailyReminders: m("cron:dailyReminders"),
   },
   seed: {
-    seedServicesAndPackages: m("seed:seedServicesAndPackages"),
+    seedServices: m("seed:seedServices"),
   },
 };

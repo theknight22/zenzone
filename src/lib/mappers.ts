@@ -1,4 +1,4 @@
-import type { Service, ServicePackage } from '@/types';
+import type { Service } from '@/types';
 import type { Appointment, Shift } from '@/types/admin';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,20 +16,6 @@ export function mapConvexService(doc: ConvexDoc): Service {
     description: doc.description,
     price: doc.price,
     category: doc.category,
-  };
-}
-
-/**
- * Map a Convex package document to the frontend ServicePackage type.
- */
-export function mapConvexPackage(doc: ConvexDoc): ServicePackage {
-  return {
-    id: doc._id.toString(),
-    name: doc.name,
-    description: doc.description,
-    originalPrice: doc.originalPrice,
-    price: doc.price,
-    terms: doc.terms,
   };
 }
 

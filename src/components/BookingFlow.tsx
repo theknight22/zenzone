@@ -96,7 +96,9 @@ export function BookingFlow({ booking, dispatch }: Props) {
 
         {submitSuccess && (
           <div className="mb-6 bg-sage-50 border border-sage-200 rounded-xl p-4 text-center">
-            <p className="text-sage-700 font-medium">Termin primljen! Provjerite email za potvrdu.</p>
+            <p className="text-sage-700 font-medium">
+              Termin primljen! Uskoro će biti potvrđen. Ako ste unijeli email, dobit ćete obavijest.
+            </p>
             <button
               onClick={() => setSubmitSuccess(false)}
               className="mt-2 text-sage-600 text-sm underline"
